@@ -1,0 +1,22 @@
+{
+    "name": "lend-btc",
+    "version": "1.0.0",
+    "description": "LendBTC — Bitcoin-native DeFi lending protocol on OP_NET",
+    "scripts": {
+        "build": "asc --config asconfig.json --target lend-btc",
+        "lint": "eslint src --ext .ts",
+        "typecheck": "tsc --noEmit",
+        "clean": "rm -rf build/*"
+    },
+    "dependencies": {
+        "@btc-vision/as-bignum": "0.1.2",
+        "@btc-vision/btc-runtime": "rc"
+    },
+    "devDependencies": {
+        "@btc-vision/assemblyscript": "^0.29.2",
+        "@btc-vision/opnet-transform": "1.1.0",
+        "eslint": "^9.39.2",
+        "@eslint/js": "^9.39.2"
+    },
+    "overrides": {}
+}

@@ -1,0 +1,5 @@
+{
+    "extends": "@btc-vision/btc-runtime/tsconfig.json",
+    "include": ["src/**/*.ts"],
+    "exclude": ["node_modules"]
+}

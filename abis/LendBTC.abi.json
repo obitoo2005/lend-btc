@@ -1,0 +1,1600 @@
+{
+    "functions": [
+        {
+            "name": "_deposit",
+            "type": "Function",
+            "payable": false,
+            "onlyOwner": false,
+            "inputs": [
+                {
+                    "name": "token",
+                    "type": "UINT8"
+                },
+                {
+                    "name": "amount",
+                    "type": "UINT256"
+                }
+            ],
+            "outputs": [
+                {
+                    "name": "sharesReceived",
+                    "type": "UINT256"
+                }
+            ]
+        },
+        {
+            "name": "_addCollateral",
+            "type": "Function",
+            "payable": false,
+            "onlyOwner": false,
+            "inputs": [
+                {
+                    "name": "token",
+                    "type": "UINT8"
+                },
+                {
+                    "name": "amount",
+                    "type": "UINT256"
+                }
+            ],
+            "outputs": [
+                {
+                    "name": "sharesReceived",
+                    "type": "UINT256"
+                }
+            ]
+        },
+        {
+            "name": "_withdrawCollateral",
+            "type": "Function",
+            "payable": false,
+            "onlyOwner": false,
+            "inputs": [
+                {
+                    "name": "token",
+                    "type": "UINT8"
+                },
+                {
+                    "name": "amount",
+                    "type": "UINT256"
+                }
+            ],
+            "outputs": [
+                {
+                    "name": "success",
+                    "type": "BOOL"
+                }
+            ]
+        },
+        {
+            "name": "_withdraw",
+            "type": "Function",
+            "payable": false,
+            "onlyOwner": false,
+            "inputs": [
+                {
+                    "name": "token",
+                    "type": "UINT8"
+                },
+                {
+                    "name": "amount",
+                    "type": "UINT256"
+                }
+            ],
+            "outputs": [
+                {
+                    "name": "success",
+                    "type": "BOOL"
+                }
+            ]
+        },
+        {
+            "name": "_getDepositPosition",
+            "type": "Function",
+            "payable": false,
+            "onlyOwner": false,
+            "inputs": [
+                {
+                    "name": "user",
+                    "type": "ADDRESS"
+                },
+                {
+                    "name": "token",
+                    "type": "UINT8"
+                }
+            ],
+            "outputs": [
+                {
+                    "name": "netDeposited",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "shares",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "tokenBalance",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "earnedInterest",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "currentAPR",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "estimatedAPY",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "historicalAPYBps",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "firstDepositBlock",
+                    "type": "UINT256"
+                }
+            ]
+        },
+        {
+            "name": "_getAllDepositPositions",
+            "type": "Function",
+            "payable": false,
+            "onlyOwner": false,
+            "inputs": [
+                {
+                    "name": "user",
+                    "type": "ADDRESS"
+                }
+            ],
+            "outputs": [
+                {
+                    "name": "btcNetDeposited",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "btcShares",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "btcTokenBalance",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "btcEarned",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "btcCurrentAPR",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "btcEstimatedAPY",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "btcHistoricalAPY",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "btcDepositBlock",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "motoNetDeposited",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "motoShares",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "motoTokenBalance",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "motoEarned",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "motoCurrentAPR",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "motoEstimatedAPY",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "motoHistoricalAPY",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "motoDepositBlock",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "pillNetDeposited",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "pillShares",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "pillTokenBalance",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "pillEarned",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "pillCurrentAPR",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "pillEstimatedAPY",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "pillHistoricalAPY",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "pillDepositBlock",
+                    "type": "UINT256"
+                }
+            ]
+        },
+        {
+            "name": "_getInterestRates",
+            "type": "Function",
+            "payable": false,
+            "onlyOwner": false,
+            "inputs": [
+                {
+                    "name": "token",
+                    "type": "UINT8"
+                }
+            ],
+            "outputs": [
+                {
+                    "name": "borrowAPR",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "supplyAPR",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "borrowAPY",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "supplyAPY",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "utilizationRate",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "totalDeposits",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "totalBorrowed",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "availLiquidity",
+                    "type": "UINT256"
+                }
+            ]
+        },
+        {
+            "name": "_getAllPoolRates",
+            "type": "Function",
+            "payable": false,
+            "onlyOwner": false,
+            "inputs": [],
+            "outputs": [
+                {
+                    "name": "btcBorrowAPR",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "btcSupplyAPR",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "btcBorrowAPY",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "btcSupplyAPY",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "btcUtilizationRate",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "btcTotalDeposits",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "btcTotalBorrowed",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "btcAvailLiquidity",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "motoBorrowAPR",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "motoSupplyAPR",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "motoBorrowAPY",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "motoSupplyAPY",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "motoUtilizationRate",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "motoTotalDeposits",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "motoTotalBorrowed",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "motoAvailLiquidity",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "pillBorrowAPR",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "pillSupplyAPR",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "pillBorrowAPY",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "pillSupplyAPY",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "pillUtilizationRate",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "pillTotalDeposits",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "pillTotalBorrowed",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "pillAvailLiquidity",
+                    "type": "UINT256"
+                }
+            ]
+        },
+        {
+            "name": "_getPoolInfo",
+            "type": "Function",
+            "payable": false,
+            "onlyOwner": false,
+            "inputs": [
+                {
+                    "name": "token",
+                    "type": "UINT8"
+                }
+            ],
+            "outputs": [
+                {
+                    "name": "totalDeposits",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "totalBorrowed",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "availableLiquidity",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "utilizationRate",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "interestRate",
+                    "type": "UINT256"
+                }
+            ]
+        },
+        {
+            "name": "_getExchangeRate",
+            "type": "Function",
+            "payable": false,
+            "onlyOwner": false,
+            "inputs": [
+                {
+                    "name": "token",
+                    "type": "UINT8"
+                }
+            ],
+            "outputs": [
+                {
+                    "name": "exchangeRate",
+                    "type": "UINT256"
+                }
+            ]
+        },
+        {
+            "name": "_borrow",
+            "type": "Function",
+            "payable": false,
+            "onlyOwner": false,
+            "inputs": [
+                {
+                    "name": "token",
+                    "type": "UINT8"
+                },
+                {
+                    "name": "amount",
+                    "type": "UINT256"
+                }
+            ],
+            "outputs": [
+                {
+                    "name": "collateralValue",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "borrowValue",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "ltvAfterBorrow",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "healthFactorAfter",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "riskStatus",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "loyaltyDiscountBps",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "loyaltyTier",
+                    "type": "UINT256"
+                }
+            ]
+        },
+        {
+            "name": "_repay",
+            "type": "Function",
+            "payable": false,
+            "onlyOwner": false,
+            "inputs": [
+                {
+                    "name": "token",
+                    "type": "UINT8"
+                },
+                {
+                    "name": "amount",
+                    "type": "UINT256"
+                }
+            ],
+            "outputs": [
+                {
+                    "name": "actualRepaid",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "remainingDebt",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "healthFactor",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "riskStatus",
+                    "type": "UINT256"
+                }
+            ]
+        },
+        {
+            "name": "_getBorrowPosition",
+            "type": "Function",
+            "payable": false,
+            "onlyOwner": false,
+            "inputs": [
+                {
+                    "name": "user",
+                    "type": "ADDRESS"
+                },
+                {
+                    "name": "token",
+                    "type": "UINT8"
+                }
+            ],
+            "outputs": [
+                {
+                    "name": "userDebt",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "userCollateral",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "debtValueInSats",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "totalBorrowValueSats",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "loanToValueRatio",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "interestRate",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "healthFactor",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "maxBorrowable",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "isLiquidatable",
+                    "type": "UINT256"
+                }
+            ]
+        },
+        {
+            "name": "_getAllBorrowPositions",
+            "type": "Function",
+            "payable": false,
+            "onlyOwner": false,
+            "inputs": [
+                {
+                    "name": "user",
+                    "type": "ADDRESS"
+                }
+            ],
+            "outputs": [
+                {
+                    "name": "btcDebt",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "btcCollateral",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "btcDebtValueSats",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "btcTotalBorrowSats",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "btcLTV",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "btcInterestRate",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "btcHealthFactor",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "btcMaxBorrowable",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "btcIsLiquidatable",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "motoDebt",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "motoCollateral",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "motoDebtValueSats",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "motoTotalBorrowSats",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "motoLTV",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "motoInterestRate",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "motoHealthFactor",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "motoMaxBorrowable",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "motoIsLiquidatable",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "pillDebt",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "pillCollateral",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "pillDebtValueSats",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "pillTotalBorrowSats",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "pillLTV",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "pillInterestRate",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "pillHealthFactor",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "pillMaxBorrowable",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "pillIsLiquidatable",
+                    "type": "UINT256"
+                }
+            ]
+        },
+        {
+            "name": "_previewBorrow",
+            "type": "Function",
+            "payable": false,
+            "onlyOwner": false,
+            "inputs": [
+                {
+                    "name": "token",
+                    "type": "UINT8"
+                },
+                {
+                    "name": "amount",
+                    "type": "UINT256"
+                }
+            ],
+            "outputs": [
+                {
+                    "name": "isAllowed",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "rejectReason",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "collateralValue",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "currentBorrowValue",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "newBorrowValue",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "newHealthFactor",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "newLTV",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "maxBorrowable",
+                    "type": "UINT256"
+                }
+            ]
+        },
+        {
+            "name": "_liquidate",
+            "type": "Function",
+            "payable": false,
+            "onlyOwner": false,
+            "inputs": [
+                {
+                    "name": "borrower",
+                    "type": "ADDRESS"
+                },
+                {
+                    "name": "collateralToken",
+                    "type": "UINT8"
+                },
+                {
+                    "name": "borrowToken",
+                    "type": "UINT8"
+                },
+                {
+                    "name": "debtAmount",
+                    "type": "UINT256"
+                }
+            ],
+            "outputs": [
+                {
+                    "name": "collateralSeized",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "debtRepaid",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "liquidationBonus",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "borrowerHFAfter",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "borrowerRiskAfter",
+                    "type": "UINT256"
+                }
+            ]
+        },
+        {
+            "name": "_getLiquidationInfo",
+            "type": "Function",
+            "payable": false,
+            "onlyOwner": false,
+            "inputs": [
+                {
+                    "name": "borrower",
+                    "type": "ADDRESS"
+                }
+            ],
+            "outputs": [
+                {
+                    "name": "isLiquidatable",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "healthFactor",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "collateralValue",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "borrowValue",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "btcDebt",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "motoDebt",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "pillDebt",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "btcCollateral",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "motoCollateral",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "pillCollateral",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "maxLiquidatableBtc",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "maxLiquidatableMoto",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "maxLiquidatablePill",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "liquidationBonusBps",
+                    "type": "UINT256"
+                }
+            ]
+        },
+        {
+            "name": "_previewLiquidation",
+            "type": "Function",
+            "payable": false,
+            "onlyOwner": false,
+            "inputs": [
+                {
+                    "name": "borrower",
+                    "type": "ADDRESS"
+                },
+                {
+                    "name": "collateralToken",
+                    "type": "UINT8"
+                },
+                {
+                    "name": "borrowToken",
+                    "type": "UINT8"
+                },
+                {
+                    "name": "debtAmount",
+                    "type": "UINT256"
+                }
+            ],
+            "outputs": [
+                {
+                    "name": "isAllowed",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "rejectReason",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "actualDebtRepaid",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "collatBase",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "bonusAmount",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "collateralSeized",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "borrowerHFAfter",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "borrowerRiskAfter",
+                    "type": "UINT256"
+                }
+            ]
+        },
+        {
+            "name": "_creditBtcDeposit",
+            "type": "Function",
+            "payable": false,
+            "onlyOwner": false,
+            "inputs": [
+                {
+                    "name": "user",
+                    "type": "ADDRESS"
+                },
+                {
+                    "name": "amount",
+                    "type": "UINT256"
+                }
+            ],
+            "outputs": [
+                {
+                    "name": "sharesReceived",
+                    "type": "UINT256"
+                }
+            ]
+        },
+        {
+            "name": "_getUserVault",
+            "type": "Function",
+            "payable": false,
+            "onlyOwner": false,
+            "inputs": [
+                {
+                    "name": "user",
+                    "type": "ADDRESS"
+                }
+            ],
+            "outputs": [
+                {
+                    "name": "collateralValue",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "borrowValue",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "healthFactor",
+                    "type": "UINT256"
+                }
+            ]
+        },
+        {
+            "name": "_getHealthFactor",
+            "type": "Function",
+            "payable": false,
+            "onlyOwner": false,
+            "inputs": [
+                {
+                    "name": "user",
+                    "type": "ADDRESS"
+                }
+            ],
+            "outputs": [
+                {
+                    "name": "healthFactor",
+                    "type": "UINT256"
+                }
+            ]
+        },
+        {
+            "name": "_setTokenAddresses",
+            "type": "Function",
+            "payable": false,
+            "onlyOwner": false,
+            "inputs": [
+                {
+                    "name": "motoAddress",
+                    "type": "ADDRESS"
+                },
+                {
+                    "name": "pillAddress",
+                    "type": "ADDRESS"
+                }
+            ],
+            "outputs": [
+                {
+                    "name": "success",
+                    "type": "BOOL"
+                }
+            ]
+        },
+        {
+            "name": "_setPrice",
+            "type": "Function",
+            "payable": false,
+            "onlyOwner": false,
+            "inputs": [
+                {
+                    "name": "token",
+                    "type": "UINT8"
+                },
+                {
+                    "name": "price",
+                    "type": "UINT256"
+                }
+            ],
+            "outputs": [
+                {
+                    "name": "success",
+                    "type": "BOOL"
+                }
+            ]
+        },
+        {
+            "name": "_setPaused",
+            "type": "Function",
+            "payable": false,
+            "onlyOwner": false,
+            "inputs": [
+                {
+                    "name": "paused",
+                    "type": "BOOL"
+                }
+            ],
+            "outputs": [
+                {
+                    "name": "success",
+                    "type": "BOOL"
+                }
+            ]
+        },
+        {
+            "name": "_getLoyaltyInfo",
+            "type": "Function",
+            "payable": false,
+            "onlyOwner": false,
+            "inputs": [
+                {
+                    "name": "user",
+                    "type": "ADDRESS"
+                }
+            ],
+            "outputs": [
+                {
+                    "name": "motoBalance",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "loyaltyTier",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "discountBps",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "nextTierThreshold",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "nextTierDiscountBps",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "motoToNextTier",
+                    "type": "UINT256"
+                }
+            ]
+        },
+        {
+            "name": "_getEffectiveBorrowRate",
+            "type": "Function",
+            "payable": false,
+            "onlyOwner": false,
+            "inputs": [
+                {
+                    "name": "token",
+                    "type": "UINT8"
+                }
+            ],
+            "outputs": [
+                {
+                    "name": "baseBorrowAPR",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "effectiveBorrowAPR",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "effectiveBorrowAPY",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "discountBps",
+                    "type": "UINT256"
+                }
+            ]
+        },
+        {
+            "name": "_getRiskStatus",
+            "type": "Function",
+            "payable": false,
+            "onlyOwner": false,
+            "inputs": [
+                {
+                    "name": "user",
+                    "type": "ADDRESS"
+                }
+            ],
+            "outputs": [
+                {
+                    "name": "collateralValue",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "borrowValue",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "healthFactor",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "loanToValueRatio",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "riskStatus",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "safeMaxBorrow",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "warningMaxBorrow",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "liquidationCollatValue",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "distanceToLiquidationBps",
+                    "type": "UINT256"
+                }
+            ]
+        },
+        {
+            "name": "_previewRisk2",
+            "type": "Function",
+            "payable": false,
+            "onlyOwner": false,
+            "inputs": [
+                {
+                    "name": "action",
+                    "type": "UINT8"
+                },
+                {
+                    "name": "token",
+                    "type": "UINT8"
+                },
+                {
+                    "name": "amount",
+                    "type": "UINT256"
+                }
+            ],
+            "outputs": [
+                {
+                    "name": "currentRiskStatus",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "newRiskStatus",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "currentHF",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "newHF",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "currentLTV",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "newLTV",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "currentBorrowValue",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "newBorrowValue",
+                    "type": "UINT256"
+                }
+            ]
+        },
+        {
+            "name": "_getRiskParameters",
+            "type": "Function",
+            "payable": false,
+            "onlyOwner": false,
+            "inputs": [],
+            "outputs": [
+                {
+                    "name": "liquidationThreshold",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "hfLiquidationFloor",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "hfSafeThreshold",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "liquidationBonus",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "maxLiquidationPct",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "collateralRatioBps",
+                    "type": "UINT256"
+                }
+            ]
+        },
+        {
+            "name": "_getVault",
+            "type": "Function",
+            "payable": false,
+            "onlyOwner": false,
+            "inputs": [
+                {
+                    "name": "user",
+                    "type": "ADDRESS"
+                }
+            ],
+            "outputs": [
+                {
+                    "name": "totalCollateralValue",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "totalBorrowValue",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "healthFactor",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "loanToValueRatio",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "liquidationThreshold",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "liquidationHFThreshold",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "availableCredit",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "isLiquidatable",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "btcCollateralBalance",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "motoCollateralBalance",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "pillCollateralBalance",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "btcDebtBalance",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "motoDebtBalance",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "pillDebtBalance",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "btcCollateralEnabled",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "motoCollateralEnabled",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "pillCollateralEnabled",
+                    "type": "UINT256"
+                }
+            ]
+        },
+        {
+            "name": "_stakePill",
+            "type": "Function",
+            "payable": false,
+            "onlyOwner": false,
+            "inputs": [
+                {
+                    "name": "amount",
+                    "type": "UINT256"
+                }
+            ],
+            "outputs": [
+                {
+                    "name": "totalStaked",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "protectionActive",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "liqThreshold",
+                    "type": "UINT256"
+                }
+            ]
+        },
+        {
+            "name": "_unstakePill",
+            "type": "Function",
+            "payable": false,
+            "onlyOwner": false,
+            "inputs": [
+                {
+                    "name": "amount",
+                    "type": "UINT256"
+                }
+            ],
+            "outputs": [
+                {
+                    "name": "totalStaked",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "protectionActive",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "liqThreshold",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "healthFactor",
+                    "type": "UINT256"
+                }
+            ]
+        },
+        {
+            "name": "_getPillProtection",
+            "type": "Function",
+            "payable": false,
+            "onlyOwner": false,
+            "inputs": [
+                {
+                    "name": "user",
+                    "type": "ADDRESS"
+                }
+            ],
+            "outputs": [
+                {
+                    "name": "pillStaked",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "protectionActive",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "liqThreshold",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "minStakeRequired",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "pillToActivate",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "healthFactor",
+                    "type": "UINT256"
+                }
+            ]
+        },
+        {
+            "name": "_openLoop",
+            "type": "Function",
+            "payable": false,
+            "onlyOwner": false,
+            "inputs": [
+                {
+                    "name": "loopLevel",
+                    "type": "UINT8"
+                }
+            ],
+            "outputs": [
+                {
+                    "name": "loopLevel",
+                    "type": "UINT8"
+                },
+                {
+                    "name": "initialBtcDeposit",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "motoBorrowed",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "totalBtcExposure",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "totalCollatSats",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "healthFactor",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "riskStatus",
+                    "type": "UINT256"
+                }
+            ]
+        },
+        {
+            "name": "_closeLoop",
+            "type": "Function",
+            "payable": false,
+            "onlyOwner": false,
+            "inputs": [],
+            "outputs": [
+                {
+                    "name": "wasActive",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "motoDebt",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "btcBalance",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "healthFactor",
+                    "type": "UINT256"
+                }
+            ]
+        },
+        {
+            "name": "_getLoopMetrics",
+            "type": "Function",
+            "payable": false,
+            "onlyOwner": false,
+            "inputs": [
+                {
+                    "name": "user",
+                    "type": "ADDRESS"
+                }
+            ],
+            "outputs": [
+                {
+                    "name": "loopLevel",
+                    "type": "UINT8"
+                },
+                {
+                    "name": "isActive",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "initialBtcDeposit",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "currentBtcBalance",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "loopedBtcAdded",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "motoBorrowed",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "totalCollatSats",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "healthFactor",
+                    "type": "UINT256"
+                }
+            ]
+        },
+        {
+            "name": "_previewLoop",
+            "type": "Function",
+            "payable": false,
+            "onlyOwner": false,
+            "inputs": [
+                {
+                    "name": "loopLevel",
+                    "type": "UINT8"
+                }
+            ],
+            "outputs": [
+                {
+                    "name": "projectedMotoToBorrow",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "projectedBtcToAdd",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "projectedTotalCollatSats",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "projectedBorrowSats",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "projectedHF",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "projectedRiskStatus",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "isSafe",
+                    "type": "UINT256"
+                }
+            ]
+        }
+    ],
+    "events": []
+}

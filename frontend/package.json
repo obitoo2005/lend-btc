@@ -1,0 +1,13 @@
+{
+  "name": "lend-btc-frontend",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "dev": "node build.mjs --watch"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "esbuild": "^0.27.3"
+  }
+}

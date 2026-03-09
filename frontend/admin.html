@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LendBTC Admin Setup</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #0a0a0f;
+    color: #e0e0e0;
+    font-family: 'Segoe UI', monospace;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(247,147,26,0.25);
+    border-radius: 16px;
+    padding: 32px;
+    max-width: 600px;
+    width: 100%;
+  }
+  h1 { color: #F7931A; font-size: 1.4rem; margin-bottom: 4px; }
+  .sub { color: #888; font-size: 0.85rem; margin-bottom: 28px; }
+  .section { margin-bottom: 24px; }
+  label { display: block; font-size: 0.8rem; color: #aaa; margin-bottom: 6px; }
+  input {
+    width: 100%;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 8px;
+    color: #fff;
+    padding: 10px 14px;
+    font-size: 0.9rem;
+    outline: none;
+  }
+  input:focus { border-color: #F7931A; }
+  .row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  button {
+    width: 100%;
+    background: linear-gradient(135deg, #F7931A, #e8831a);
+    color: #000;
+    font-weight: 700;
+    font-size: 1rem;
+    border: none;
+    border-radius: 10px;
+    padding: 14px;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: opacity 0.2s;
+  }
+  button:hover { opacity: 0.9; }
+  button:disabled { opacity: 0.4; cursor: not-allowed; }
+  #log {
+    margin-top: 24px;
+    background: rgba(0,0,0,0.4);
+    border-radius: 8px;
+    padding: 16px;
+    font-family: monospace;
+    font-size: 0.8rem;
+    line-height: 1.8;
+    min-height: 60px;
+    display: none;
+  }
+  .ok  { color: #4ade80; }
+  .err { color: #f87171; }
+  .inf { color: #F7931A; }
+  .dim { color: #888; }
+  #wallet-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    margin-bottom: 20px;
+    padding: 10px 14px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: #888; }
+  .dot.green { background: #4ade80; }
+  .dot.orange { background: #F7931A; }
+  a { color: #F7931A; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>LendBTC Admin Setup</h1>
+  <p class="sub">One-time on-chain configuration via OPWallet</p>
+
+  <div id="wallet-status">
+    <div class="dot" id="dot"></div>
+    <span id="wallet-text">Checking OPWallet...</span>
+  </div>
+
+  <div class="section">
+    <label>Contract Address</label>
+    <input id="contract" value="opt1sqru0uq56ln39kxvnfexscfcq4uvvwjalqsna5vu8" />
+  </div>
+
+  <div class="section">
+    <label>MOTO Token Address</label>
+    <input id="moto" value="opt1sqzkx6wm5acawl9m6nay2mjsm6wagv7gazcgtczds" />
+  </div>
+
+  <div class="section">
+    <label>PILL Token Address</label>
+    <input id="pill" value="opt1sqp5gx9k0nrqph3sy3aeyzt673dz7ygtqxcfdqfle" />
+  </div>
+
+  <div class="section">
+    <label>Prices (in satoshis × 10⁸ scale)</label>
+    <div class="row">
+      <div>
+        <label>BTC Price</label>
+        <input id="btcPrice" value="9700000000000" />
+      </div>
+      <div>
+        <label>MOTO Price</label>
+        <input id="motoPrice" value="84200000" />
+      </div>
+      <div>
+        <label>PILL Price</label>
+        <input id="pillPrice" value="12400000" />
+      </div>
+    </div>
+  </div>
+
+  <button id="runBtn" onclick="runSetup()" disabled>Connect OPWallet First</button>
+
+  <div id="log"></div>
+</div>
+
+<script>
+// ── Helpers ──────────────────────────────────────────────────────────────────
+
+async function sha256First4(sig) {
+  const buf  = new TextEncoder().encode(sig);
+  const hash = await crypto.subtle.digest('SHA-256', buf);
+  return new Uint8Array(hash).slice(0, 4);
+}
+
+function encodeU8(v) {
+  return new Uint8Array([v & 0xff]);
+}
+
+function encodeU256(bigint) {
+  const buf = new Uint8Array(32);
+  let n = BigInt(bigint);
+  for (let i = 31; i >= 0; i--) { buf[i] = Number(n & 0xffn); n >>= 8n; }
+  return buf;
+}
+
+function encodeOpnetAddress(addr) {
+  // OP_NET bech32 address → need to pass as raw string bytes padded to 32
+  // OPWallet accepts the bech32 string directly in calldata as UTF-8? No —
+  // OP_NET addresses on-chain are stored as 32-byte pubkey hashes.
+  // OPWallet's sendInteraction encodes address params as the 32-byte pubkey buffer.
+  // We pass the bech32 string; OPWallet / the SDK handles the decode.
+  // For raw calldata we encode as 32 zero-padded UTF-8 bytes of the address.
+  const enc = new TextEncoder().encode(addr);
+  const buf = new Uint8Array(32);
+  buf.set(enc.slice(0, 32));
+  return buf;
+}
+
+function concat(...arrays) {
+  const total = arrays.reduce((s, a) => s + a.length, 0);
+  const out = new Uint8Array(total);
+  let off = 0;
+  for (const a of arrays) { out.set(a, off); off += a.length; }
+  return out;
+}
+
+function toHex(bytes) {
+  return Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+async function buildCalldata(sig, ...params) {
+  const sel  = await sha256First4(sig);
+  const args = params.length ? concat(...params) : new Uint8Array(0);
+  return '0x' + toHex(concat(sel, args));
+}
+
+// ── Log ───────────────────────────────────────────────────────────────────────
+
+const logEl = document.getElementById('log');
+function log(msg, cls = '') {
+  logEl.style.display = 'block';
+  const line = document.createElement('div');
+  line.className = cls;
+  line.textContent = msg;
+  logEl.appendChild(line);
+  logEl.scrollTop = logEl.scrollHeight;
+}
+
+// ── Wallet detection ─────────────────────────────────────────────────────────
+
+let opnet = null;
+
+async function detectWallet() {
+  const dot  = document.getElementById('dot');
+  const text = document.getElementById('wallet-text');
+  const btn  = document.getElementById('runBtn');
+
+  // Give extension time to inject
+  await new Promise(r => setTimeout(r, 800));
+
+  opnet = window.opnet ?? window.OPWallet ?? null;
+
+  if (!opnet) {
+    dot.className  = 'dot';
+    text.textContent = 'OPWallet not detected — install it from opnet.org';
+    return;
+  }
+
+  try {
+    const accounts = await opnet.requestAccounts?.() ?? await opnet.getAccounts?.() ?? [];
+    if (accounts?.length) {
+      dot.className  = 'dot green';
+      text.textContent = `Connected: ${accounts[0]}`;
+      btn.disabled   = false;
+      btn.textContent = 'Run Admin Setup (4 transactions)';
+    } else {
+      dot.className  = 'dot orange';
+      text.textContent = 'OPWallet found — click to connect';
+      btn.disabled   = false;
+      btn.textContent = 'Connect & Run Admin Setup';
+    }
+  } catch(e) {
+    dot.className  = 'dot orange';
+    text.textContent = 'OPWallet found — click to connect';
+    btn.disabled   = false;
+    btn.textContent = 'Connect & Run Admin Setup';
+  }
+}
+
+// ── Main setup ────────────────────────────────────────────────────────────────
+
+async function runSetup() {
+  const btn = document.getElementById('runBtn');
+  btn.disabled = true;
+
+  const contract  = document.getElementById('contract').value.trim();
+  const moto      = document.getElementById('moto').value.trim();
+  const pill      = document.getElementById('pill').value.trim();
+  const btcPrice  = BigInt(document.getElementById('btcPrice').value.trim());
+  const motoPrice = BigInt(document.getElementById('motoPrice').value.trim());
+  const pillPrice = BigInt(document.getElementById('pillPrice').value.trim());
+
+  logEl.innerHTML = '';
+  log('Starting admin setup...', 'inf');
+
+  // Ensure wallet connected
+  try {
+    const accounts = await (opnet.requestAccounts?.() ?? opnet.getAccounts?.() ?? []);
+    if (!accounts?.length) throw new Error('No accounts returned');
+    log(`Wallet: ${accounts[0]}`, 'dim');
+    document.getElementById('dot').className = 'dot green';
+    document.getElementById('wallet-text').textContent = `Connected: ${accounts[0]}`;
+  } catch(e) {
+    log(`❌ Wallet connect failed: ${e.message}`, 'err');
+    btn.disabled = false;
+    return;
+  }
+
+  // ── Tx 1: setTokenAddresses ───────────────────────────────────────────────
+  try {
+    log('1/4  setTokenAddresses(MOTO, PILL)...', 'inf');
+    const cd = await buildCalldata(
+      'setTokenAddresses(address,address)',
+      encodeOpnetAddress(moto),
+      encodeOpnetAddress(pill),
+    );
+    const result = await opnet.sendInteraction?.({
+      contract,
+      calldata: cd,
+      satAmount: 0,
+    }) ?? await opnet.sendTransaction?.({ to: contract, data: cd });
+    log(`  raw: ${JSON.stringify(result)}`, 'dim');
+    const txid = result?.txid ?? result?.hash ?? result?.txHash ?? result?.broadcastedTransaction?.txid ?? (typeof result === 'string' ? result : '(no txid)');
+    log(`  ✓ txid: ${txid}`, 'ok');
+  } catch(e) {
+    log(`  ❌ Failed: ${e.message}`, 'err');
+    log('  → The contract may not support this call, or OPWallet blocked it.', 'dim');
+  }
+
+  // ── Tx 2: setPrice(0 = BTC) ───────────────────────────────────────────────
+  try {
+    log('2/4  setPrice(BTC)...', 'inf');
+    const cd = await buildCalldata('setPrice(uint8,uint256)', encodeU8(0), encodeU256(btcPrice));
+    const result = await opnet.sendInteraction?.({ contract, calldata: cd, satAmount: 0 })
+                ?? await opnet.sendTransaction?.({ to: contract, data: cd });
+    log(`  raw: ${JSON.stringify(result)}`, 'dim');
+    const txid = result?.txid ?? result?.hash ?? result?.txHash ?? result?.broadcastedTransaction?.txid ?? (typeof result === 'string' ? result : '(no txid)');
+    log(`  ✓ txid: ${txid}`, 'ok');
+  } catch(e) {
+    log(`  ❌ Failed: ${e.message}`, 'err');
+  }
+
+  // ── Tx 3: setPrice(1 = MOTO) ─────────────────────────────────────────────
+  try {
+    log('3/4  setPrice(MOTO)...', 'inf');
+    const cd = await buildCalldata('setPrice(uint8,uint256)', encodeU8(1), encodeU256(motoPrice));
+    const result = await opnet.sendInteraction?.({ contract, calldata: cd, satAmount: 0 })
+                ?? await opnet.sendTransaction?.({ to: contract, data: cd });
+    log(`  raw: ${JSON.stringify(result)}`, 'dim');
+    const txid = result?.txid ?? result?.hash ?? result?.txHash ?? result?.broadcastedTransaction?.txid ?? (typeof result === 'string' ? result : '(no txid)');
+    log(`  ✓ txid: ${txid}`, 'ok');
+  } catch(e) {
+    log(`  ❌ Failed: ${e.message}`, 'err');
+  }
+
+  // ── Tx 4: setPrice(2 = PILL) ─────────────────────────────────────────────
+  try {
+    log('4/4  setPrice(PILL)...', 'inf');
+    const cd = await buildCalldata('setPrice(uint8,uint256)', encodeU8(2), encodeU256(pillPrice));
+    const result = await opnet.sendInteraction?.({ contract, calldata: cd, satAmount: 0 })
+                ?? await opnet.sendTransaction?.({ to: contract, data: cd });
+    log(`  raw: ${JSON.stringify(result)}`, 'dim');
+    const txid = result?.txid ?? result?.hash ?? result?.txHash ?? result?.broadcastedTransaction?.txid ?? (typeof result === 'string' ? result : '(no txid)');
+    log(`  ✓ txid: ${txid}`, 'ok');
+  } catch(e) {
+    log(`  ❌ Failed: ${e.message}`, 'err');
+  }
+
+  log('', '');
+  log('Done! Wait ~10 min for txs to confirm, then open index.html', 'ok');
+  log('Track transactions at: https://opscan.org', 'dim');
+  btn.disabled  = false;
+  btn.textContent = 'Run Again';
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+detectWallet();
+</script>
+</body>
+</html>

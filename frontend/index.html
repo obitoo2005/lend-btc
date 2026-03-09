@@ -1,0 +1,1450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LendBTC — Bitcoin DeFi Lending</title>
+  <link rel="stylesheet" href="style.css" />
+  <!-- Inter font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+<!-- ═══════════════════ TOAST CONTAINER ═══════════════════ -->
+<div id="toast-container" aria-live="polite" aria-atomic="true"></div>
+
+<!-- ═══════════════════ NAVBAR ═══════════════════ -->
+<nav class="navbar" id="navbar">
+  <div class="nav-inner">
+    <!-- Logo -->
+    <a class="nav-logo" href="#" onclick="navigateTo('dashboard'); return false;">
+      <div class="logo-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+          <path d="M11.5 2C6.25 2 2 6.25 2 11.5S6.25 21 11.5 21 21 16.75 21 11.5 16.75 2 11.5 2z" fill="url(#btcGrad)"/>
+          <path d="M14.5 8.5c0-1.1-.9-2-2-2H9v3h3.5c.55 0 1-.45 1-1zM14.5 12.5c0-1.1-.9-2-2-2H9v3h3.5c.55 0 1-.45 1-.5z" fill="#fff" stroke="none"/>
+          <rect x="10.5" y="6" width="1" height="9" fill="#fff" rx="0.5"/>
+          <rect x="12" y="6" width="1" height="9" fill="#fff" rx="0.5"/>
+          <defs>
+            <linearGradient id="btcGrad" x1="2" y1="2" x2="21" y2="21" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#F7931A"/>
+              <stop offset="100%" stop-color="#E8820C"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+      <span class="logo-text">LendBTC</span>
+      <span class="logo-badge">OP_NET</span>
+    </a>
+
+    <!-- Desktop Nav Links -->
+    <ul class="nav-links" id="nav-links">
+      <li><a href="#" class="nav-link active" data-page="dashboard" onclick="navigateTo('dashboard'); return false;">Dashboard</a></li>
+      <li><a href="#" class="nav-link" data-page="earn" onclick="navigateTo('earn'); return false;">Earn</a></li>
+      <li><a href="#" class="nav-link" data-page="borrow" onclick="navigateTo('borrow'); return false;">Borrow</a></li>
+      <li><a href="#" class="nav-link" data-page="loop" onclick="navigateTo('loop'); return false;">Yield Loop</a></li>
+      <li><a href="#" class="nav-link" data-page="portfolio" onclick="navigateTo('portfolio'); return false;">Portfolio</a></li>
+      <li><a href="#" class="nav-link" data-page="info" onclick="navigateTo('info'); return false;">Info</a></li>
+    </ul>
+
+    <!-- Wallet Area -->
+    <div class="nav-wallet">
+      <!-- Disconnected State -->
+      <button class="btn-connect" id="btn-connect" onclick="openWalletModal()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="2" y="7" width="20" height="15" rx="2"/>
+          <path d="M16 12h2v4h-2z" fill="currentColor"/>
+          <path d="M2 12h20"/>
+        </svg>
+        Connect Wallet
+      </button>
+
+      <!-- Connected State (hidden initially) -->
+      <div class="wallet-connected hidden" id="wallet-connected">
+        <div class="wallet-balance-chip">
+          <span class="wallet-btc-bal" id="wallet-btc-bal">0.0000 BTC</span>
+        </div>
+        <div class="wallet-address-chip" id="wallet-address-chip" onclick="toggleWalletDropdown()">
+          <div class="wallet-dot"></div>
+          <span id="wallet-address-short">bc1q...xxxx</span>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M6 9l6 6 6-6"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Mobile Hamburger -->
+      <button class="hamburger" id="hamburger" onclick="toggleMobileMenu()" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile Menu -->
+  <div class="mobile-menu hidden" id="mobile-menu">
+    <a href="#" class="mobile-link" data-page="dashboard" onclick="navigateTo('dashboard'); closeMobileMenu(); return false;">Dashboard</a>
+    <a href="#" class="mobile-link" data-page="earn" onclick="navigateTo('earn'); closeMobileMenu(); return false;">Earn</a>
+    <a href="#" class="mobile-link" data-page="borrow" onclick="navigateTo('borrow'); closeMobileMenu(); return false;">Borrow</a>
+    <a href="#" class="mobile-link" data-page="loop" onclick="navigateTo('loop'); closeMobileMenu(); return false;">Yield Loop</a>
+    <a href="#" class="mobile-link" data-page="portfolio" onclick="navigateTo('portfolio'); closeMobileMenu(); return false;">Portfolio</a>
+    <a href="#" class="mobile-link" data-page="info" onclick="navigateTo('info'); closeMobileMenu(); return false;">Info</a>
+    <div class="mobile-wallet-row">
+      <button class="btn-connect btn-connect-mobile" id="btn-connect-mobile" onclick="openWalletModal()">Connect Wallet</button>
+      <div class="wallet-connected hidden" id="wallet-connected-mobile">
+        <div class="wallet-address-chip" onclick="toggleWalletDropdown()">
+          <div class="wallet-dot"></div>
+          <span id="wallet-address-short-mobile">bc1q...xxxx</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Wallet Dropdown -->
+<div class="wallet-dropdown hidden" id="wallet-dropdown">
+  <div class="wallet-dropdown-header">
+    <div class="wallet-avatar">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+        <circle cx="12" cy="8" r="4" fill="url(#avatarGrad)"/>
+        <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" fill="url(#avatarGrad)"/>
+        <defs>
+          <linearGradient id="avatarGrad" x1="4" y1="4" x2="20" y2="20">
+            <stop offset="0%" stop-color="#F7931A"/>
+            <stop offset="100%" stop-color="#E8820C"/>
+          </linearGradient>
+        </defs>
+      </svg>
+    </div>
+    <div>
+      <div class="wd-label">OPWallet</div>
+      <div class="wd-network">Bitcoin Mainnet</div>
+    </div>
+  </div>
+  <div class="wd-address-row">
+    <span class="wd-full-address" id="wd-full-address">bc1q...loading</span>
+    <button class="wd-copy-btn" onclick="copyAddress()" title="Copy address">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="9" y="9" width="13" height="13" rx="2"/>
+        <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+      </svg>
+    </button>
+  </div>
+  <div class="wd-divider"></div>
+  <div class="wd-row">
+    <span class="wd-key">BTC Balance</span>
+    <span class="wd-val" id="wd-btc-balance">—</span>
+  </div>
+  <div class="wd-row">
+    <span class="wd-key">Network</span>
+    <span class="wd-badge-net">Mainnet</span>
+  </div>
+  <div class="wd-divider"></div>
+  <button class="wd-disconnect-btn" onclick="disconnectWallet()">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
+      <polyline points="16 17 21 12 16 7"/>
+      <line x1="21" y1="12" x2="9" y2="12"/>
+    </svg>
+    Disconnect
+  </button>
+</div>
+
+<!-- ═══════════════════ WALLET MODAL ═══════════════════ -->
+<div class="modal-overlay hidden" id="wallet-modal" onclick="closeWalletModal(event)">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h2 class="modal-title">Connect Wallet</h2>
+      <button class="modal-close" onclick="closeWalletModal()">&times;</button>
+    </div>
+    <p class="modal-subtitle">Choose your Bitcoin wallet to connect to LendBTC</p>
+    <div id="wallet-auto-section">
+      <button class="wallet-option wallet-option-primary" onclick="connectWallet('opwallet')" id="btn-opwallet-auto">
+        <div class="wallet-opt-icon">
+          <svg width="28" height="28" viewBox="0 0 40 40" fill="none">
+            <rect width="40" height="40" rx="10" fill="url(#opGrad)"/>
+            <text x="50%" y="57%" text-anchor="middle" dominant-baseline="middle" font-size="18" font-weight="bold" fill="white">₿</text>
+            <defs>
+              <linearGradient id="opGrad" x1="0" y1="0" x2="40" y2="40">
+                <stop offset="0%" stop-color="#F7931A"/>
+                <stop offset="100%" stop-color="#E8820C"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <div class="wallet-opt-info">
+          <div class="wallet-opt-name">OPWallet</div>
+          <div class="wallet-opt-desc">Auto-connect via extension</div>
+        </div>
+        <div class="wallet-opt-badge">Recommended</div>
+      </button>
+
+      <div style="display:flex;align-items:center;gap:10px;margin:12px 0;">
+        <div style="flex:1;height:1px;background:rgba(255,255,255,0.08)"></div>
+        <span style="color:#555;font-size:0.75rem;">or paste address manually</span>
+        <div style="flex:1;height:1px;background:rgba(255,255,255,0.08)"></div>
+      </div>
+
+      <div style="display:flex;gap:8px;">
+        <input
+          id="manual-address-input"
+          type="text"
+          placeholder="opt1p... your OP_NET address"
+          style="flex:1;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:8px;color:#fff;padding:10px 14px;font-size:0.85rem;outline:none;"
+          onkeydown="if(event.key==='Enter') connectManualAddress()"
+        />
+        <button
+          onclick="connectManualAddress()"
+          style="background:linear-gradient(135deg,#F7931A,#e8831a);color:#000;font-weight:700;border:none;border-radius:8px;padding:10px 18px;cursor:pointer;font-size:0.85rem;white-space:nowrap;"
+        >View</button>
+      </div>
+      <p style="color:#666;font-size:0.75rem;margin-top:8px;">Read-only mode — view your real on-chain positions without signing</p>
+    </div>
+    <p class="modal-footer-note" style="margin-top:16px;">OPWallet auto-connect requires HTTPS. For transactions deploy to Vercel.</p>
+  </div>
+</div>
+
+<!-- ═══════════════════ TRANSACTION MODAL ═══════════════════ -->
+<div class="modal-overlay hidden" id="tx-modal">
+  <div class="modal-card tx-modal-card">
+    <div class="tx-modal-inner" id="tx-modal-inner">
+      <!-- Content injected by JS -->
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ MAIN CONTENT ═══════════════════ -->
+<main class="main-content" id="main-content">
+
+  <!-- ─────────── PAGE: DASHBOARD ─────────── -->
+  <section class="page active" id="page-dashboard">
+    <div class="page-header fade-in">
+      <h1 class="page-title">Dashboard</h1>
+      <p class="page-subtitle">Overview of the LendBTC protocol and your positions</p>
+    </div>
+
+    <!-- Stat Cards -->
+    <div class="stats-grid fade-in" id="dashboard-stats">
+      <div class="stat-card" id="stat-tvl">
+        <div class="stat-label">Total Value Locked</div>
+        <div class="stat-value" id="stat-tvl-val">
+          <span class="skeleton-text skeleton-w-lg"></span>
+        </div>
+        <div class="stat-change positive">+2.4% today</div>
+      </div>
+      <div class="stat-card" id="stat-borrowed">
+        <div class="stat-label">Total Borrowed</div>
+        <div class="stat-value" id="stat-borrowed-val">
+          <span class="skeleton-text skeleton-w-lg"></span>
+        </div>
+        <div class="stat-change neutral">Across all pools</div>
+      </div>
+      <div class="stat-card stat-card-wallet" id="stat-networth">
+        <div class="stat-label">Your Net Worth</div>
+        <div class="stat-value" id="stat-networth-val">
+          <span class="skeleton-text skeleton-w-md"></span>
+        </div>
+        <div class="stat-change neutral" id="stat-networth-sub">Connect wallet to view</div>
+      </div>
+      <div class="stat-card" id="stat-hf">
+        <div class="stat-label">Health Factor</div>
+        <div class="stat-value hf-value" id="stat-hf-val">
+          <span class="skeleton-text skeleton-w-sm"></span>
+        </div>
+        <div class="hf-bar-wrap">
+          <div class="hf-bar" id="hf-bar-fill"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pool Cards -->
+    <div class="section-header fade-in" style="animation-delay:0.1s">
+      <h2 class="section-title">Lending Pools</h2>
+      <span class="section-badge pulse-dot"></span>
+      <span class="section-note" id="last-refresh-note">Live data</span>
+    </div>
+
+    <div class="pools-grid fade-in" id="pools-grid" style="animation-delay:0.15s">
+      <!-- BTC Pool -->
+      <div class="pool-card" id="pool-card-0">
+        <div class="pool-card-header">
+          <div class="pool-icon-wrap pool-icon-btc">
+            <span class="pool-icon-symbol">₿</span>
+          </div>
+          <div class="pool-name-col">
+            <div class="pool-name">Bitcoin</div>
+            <div class="pool-ticker">BTC · Pool 0</div>
+          </div>
+          <div class="pool-apr-col">
+            <div class="pool-apr-label">Supply APR</div>
+            <div class="pool-apr-value" id="btc-supply-apr">4.2%</div>
+          </div>
+        </div>
+
+        <div class="pool-util-section">
+          <div class="pool-util-labels">
+            <span>Utilization</span>
+            <span id="btc-util-pct">48.2%</span>
+          </div>
+          <div class="util-bar-track">
+            <div class="util-bar-fill" id="btc-util-bar" style="width:48.2%"></div>
+          </div>
+        </div>
+
+        <div class="pool-stats-row">
+          <div class="pool-stat">
+            <div class="pool-stat-label">Total Deposits</div>
+            <div class="pool-stat-val" id="btc-total-dep">25.50 BTC</div>
+          </div>
+          <div class="pool-stat">
+            <div class="pool-stat-label">Total Borrowed</div>
+            <div class="pool-stat-val" id="btc-total-bor">12.30 BTC</div>
+          </div>
+          <div class="pool-stat">
+            <div class="pool-stat-label">Borrow APR</div>
+            <div class="pool-stat-val orange" id="btc-borrow-apr">8.7%</div>
+          </div>
+        </div>
+
+        <div class="pool-user-section" id="btc-user-section">
+          <div class="pool-user-row">
+            <span class="pool-user-label">Your Deposit</span>
+            <span class="pool-user-val" id="btc-user-dep">—</span>
+          </div>
+          <div class="pool-user-row">
+            <span class="pool-user-label">Earned Interest</span>
+            <span class="pool-user-val positive" id="btc-user-earn">—</span>
+          </div>
+        </div>
+
+        <div class="pool-actions">
+          <button class="btn-pool-action btn-deposit" onclick="navigateTo('earn'); setEarnTab('btc')">Deposit</button>
+          <button class="btn-pool-action btn-borrow" onclick="navigateTo('borrow'); setBorrowPool('btc')">Borrow</button>
+        </div>
+      </div>
+
+      <!-- MOTO Pool -->
+      <div class="pool-card" id="pool-card-1">
+        <div class="pool-card-header">
+          <div class="pool-icon-wrap pool-icon-moto">
+            <span class="pool-icon-symbol">M</span>
+          </div>
+          <div class="pool-name-col">
+            <div class="pool-name">MOTO</div>
+            <div class="pool-ticker">MOTO · Pool 1</div>
+          </div>
+          <div class="pool-apr-col">
+            <div class="pool-apr-label">Supply APR</div>
+            <div class="pool-apr-value" id="moto-supply-apr">6.8%</div>
+          </div>
+        </div>
+
+        <div class="pool-util-section">
+          <div class="pool-util-labels">
+            <span>Utilization</span>
+            <span id="moto-util-pct">34.4%</span>
+          </div>
+          <div class="util-bar-track">
+            <div class="util-bar-fill" id="moto-util-bar" style="width:34.4%"></div>
+          </div>
+        </div>
+
+        <div class="pool-stats-row">
+          <div class="pool-stat">
+            <div class="pool-stat-label">Total Deposits</div>
+            <div class="pool-stat-val" id="moto-total-dep">1.25M MOTO</div>
+          </div>
+          <div class="pool-stat">
+            <div class="pool-stat-label">Total Borrowed</div>
+            <div class="pool-stat-val" id="moto-total-bor">430K MOTO</div>
+          </div>
+          <div class="pool-stat">
+            <div class="pool-stat-label">Borrow APR</div>
+            <div class="pool-stat-val orange" id="moto-borrow-apr">14.2%</div>
+          </div>
+        </div>
+
+        <div class="pool-user-section" id="moto-user-section">
+          <div class="pool-user-row">
+            <span class="pool-user-label">Your Deposit</span>
+            <span class="pool-user-val" id="moto-user-dep">—</span>
+          </div>
+          <div class="pool-user-row">
+            <span class="pool-user-label">Earned Interest</span>
+            <span class="pool-user-val positive" id="moto-user-earn">—</span>
+          </div>
+        </div>
+
+        <div class="pool-actions">
+          <button class="btn-pool-action btn-deposit" onclick="navigateTo('earn'); setEarnTab('moto')">Deposit</button>
+          <button class="btn-pool-action btn-borrow" onclick="navigateTo('borrow'); setBorrowPool('moto')">Borrow</button>
+        </div>
+      </div>
+
+      <!-- PILL Pool -->
+      <div class="pool-card" id="pool-card-2">
+        <div class="pool-card-header">
+          <div class="pool-icon-wrap pool-icon-pill">
+            <span class="pool-icon-symbol">P</span>
+          </div>
+          <div class="pool-name-col">
+            <div class="pool-name">PILL</div>
+            <div class="pool-ticker">PILL · Pool 2</div>
+          </div>
+          <div class="pool-apr-col">
+            <div class="pool-apr-label">Supply APR</div>
+            <div class="pool-apr-value" id="pill-supply-apr">5.1%</div>
+          </div>
+        </div>
+
+        <div class="pool-util-section">
+          <div class="pool-util-labels">
+            <span>Utilization</span>
+            <span id="pill-util-pct">23.6%</span>
+          </div>
+          <div class="util-bar-track">
+            <div class="util-bar-fill" id="pill-util-bar" style="width:23.6%"></div>
+          </div>
+        </div>
+
+        <div class="pool-stats-row">
+          <div class="pool-stat">
+            <div class="pool-stat-label">Total Deposits</div>
+            <div class="pool-stat-val" id="pill-total-dep">890K PILL</div>
+          </div>
+          <div class="pool-stat">
+            <div class="pool-stat-label">Total Borrowed</div>
+            <div class="pool-stat-val" id="pill-total-bor">210K PILL</div>
+          </div>
+          <div class="pool-stat">
+            <div class="pool-stat-label">Borrow APR</div>
+            <div class="pool-stat-val orange" id="pill-borrow-apr">11.4%</div>
+          </div>
+        </div>
+
+        <div class="pool-user-section" id="pill-user-section">
+          <div class="pool-user-row">
+            <span class="pool-user-label">Your Deposit</span>
+            <span class="pool-user-val" id="pill-user-dep">—</span>
+          </div>
+          <div class="pool-user-row">
+            <span class="pool-user-label">Earned Interest</span>
+            <span class="pool-user-val positive" id="pill-user-earn">—</span>
+          </div>
+        </div>
+
+        <div class="pool-actions">
+          <button class="btn-pool-action btn-deposit" onclick="navigateTo('earn'); setEarnTab('pill')">Deposit</button>
+          <button class="btn-pool-action btn-borrow" onclick="navigateTo('borrow'); setBorrowPool('pill')">Borrow</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────── PAGE: EARN ─────────── -->
+  <section class="page hidden" id="page-earn">
+    <div class="page-header fade-in">
+      <h1 class="page-title">Earn</h1>
+      <p class="page-subtitle">Deposit tokens to earn yield. Shares appreciate as interest accrues.</p>
+    </div>
+
+    <!-- Pool Tabs -->
+    <div class="tab-bar fade-in" id="earn-tabs">
+      <button class="tab-btn active" data-tab="btc" onclick="setEarnTab('btc')">
+        <span class="tab-icon tab-icon-btc">₿</span> BTC
+      </button>
+      <button class="tab-btn" data-tab="moto" onclick="setEarnTab('moto')">
+        <span class="tab-icon tab-icon-moto">M</span> MOTO
+      </button>
+      <button class="tab-btn" data-tab="pill" onclick="setEarnTab('pill')">
+        <span class="tab-icon tab-icon-pill">P</span> PILL
+      </button>
+    </div>
+
+    <!-- BTC Earn Tab -->
+    <div class="earn-tab-content" id="earn-tab-btc">
+      <div class="earn-btc-note fade-in">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F7931A" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        BTC deposits are credited by the OP_NET relayer after Layer 1 block confirmation (~10 min). Your shares are minted once the on-chain event is verified.
+      </div>
+      <div class="earn-grid fade-in">
+        <div class="earn-card">
+          <div class="earn-card-title">
+            <div class="pool-icon-wrap pool-icon-btc pool-icon-sm">₿</div>
+            Deposit BTC
+          </div>
+          <div class="input-group">
+            <label class="input-label">Amount</label>
+            <div class="input-wrap">
+              <input type="number" class="input-field" id="btc-deposit-input" placeholder="0.00000000" step="0.00000001" min="0" oninput="updateDepositPreview('btc')" />
+              <button class="input-max-btn" onclick="setMax('btc-deposit-input', 'btc-wallet')">Max</button>
+              <span class="input-token-label">BTC</span>
+            </div>
+          </div>
+          <div class="preview-box" id="btc-deposit-preview">
+            <div class="preview-row">
+              <span>Shares to receive</span>
+              <span id="btc-dep-shares">—</span>
+            </div>
+            <div class="preview-row">
+              <span>Current APR</span>
+              <span class="positive">4.2%</span>
+            </div>
+            <div class="preview-row">
+              <span>Wallet Balance</span>
+              <span id="btc-wallet-display">—</span>
+            </div>
+          </div>
+          <button class="btn-primary btn-full" id="btc-deposit-btn" onclick="submitTransaction('deposit', 'btc')">
+            <span class="btn-text">Deposit BTC</span>
+            <span class="btn-spinner hidden"></span>
+          </button>
+        </div>
+
+        <div class="earn-card">
+          <div class="earn-card-title">
+            <div class="pool-icon-wrap pool-icon-btc pool-icon-sm">₿</div>
+            Withdraw BTC
+          </div>
+          <div class="input-group">
+            <label class="input-label">Amount to Withdraw</label>
+            <div class="input-wrap">
+              <input type="number" class="input-field" id="btc-withdraw-input" placeholder="0.00000000" step="0.00000001" min="0" oninput="updateWithdrawPreview('btc')" />
+              <button class="input-max-btn" onclick="setMax('btc-withdraw-input', 'btc-deposited')">Max</button>
+              <span class="input-token-label">BTC</span>
+            </div>
+          </div>
+          <div class="preview-box" id="btc-withdraw-preview">
+            <div class="preview-row">
+              <span>Shares to burn</span>
+              <span id="btc-wd-shares">—</span>
+            </div>
+            <div class="preview-row">
+              <span>Est. output</span>
+              <span id="btc-wd-output">—</span>
+            </div>
+            <div class="preview-row">
+              <span>Your deposited</span>
+              <span id="btc-deposited-display">—</span>
+            </div>
+          </div>
+          <button class="btn-secondary btn-full" id="btc-withdraw-btn" onclick="submitTransaction('withdraw', 'btc')">
+            <span class="btn-text">Withdraw BTC</span>
+            <span class="btn-spinner hidden"></span>
+          </button>
+        </div>
+
+        <div class="earn-position-card">
+          <div class="earn-position-title">Your BTC Position</div>
+          <div class="position-stats">
+            <div class="pos-stat">
+              <div class="pos-stat-label">Deposited</div>
+              <div class="pos-stat-val" id="btc-pos-deposited">—</div>
+            </div>
+            <div class="pos-stat">
+              <div class="pos-stat-label">Current Value</div>
+              <div class="pos-stat-val" id="btc-pos-value">—</div>
+            </div>
+            <div class="pos-stat">
+              <div class="pos-stat-label">Earned Interest</div>
+              <div class="pos-stat-val positive" id="btc-pos-earned">—</div>
+            </div>
+            <div class="pos-stat">
+              <div class="pos-stat-label">Historical APY</div>
+              <div class="pos-stat-val" id="btc-pos-apy">4.2%</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MOTO Earn Tab -->
+    <div class="earn-tab-content hidden" id="earn-tab-moto">
+      <div class="earn-grid fade-in">
+        <div class="earn-card">
+          <div class="earn-card-title">
+            <div class="pool-icon-wrap pool-icon-moto pool-icon-sm">M</div>
+            Deposit MOTO
+          </div>
+          <div class="input-group">
+            <label class="input-label">Amount</label>
+            <div class="input-wrap">
+              <input type="number" class="input-field" id="moto-deposit-input" placeholder="0.00" min="0" oninput="updateDepositPreview('moto')" />
+              <button class="input-max-btn" onclick="setMax('moto-deposit-input', 'moto-wallet')">Max</button>
+              <span class="input-token-label">MOTO</span>
+            </div>
+          </div>
+          <div class="preview-box">
+            <div class="preview-row">
+              <span>Shares to receive</span>
+              <span id="moto-dep-shares">—</span>
+            </div>
+            <div class="preview-row">
+              <span>Current APR</span>
+              <span class="positive">6.8%</span>
+            </div>
+            <div class="preview-row">
+              <span>Loyalty Discount</span>
+              <span class="positive">Active — borrowers save 0.5%</span>
+            </div>
+          </div>
+          <button class="btn-primary btn-full" id="moto-deposit-btn" onclick="submitTransaction('deposit', 'moto')">
+            <span class="btn-text">Deposit MOTO</span>
+            <span class="btn-spinner hidden"></span>
+          </button>
+        </div>
+
+        <div class="earn-card">
+          <div class="earn-card-title">
+            <div class="pool-icon-wrap pool-icon-moto pool-icon-sm">M</div>
+            Withdraw MOTO
+          </div>
+          <div class="input-group">
+            <label class="input-label">Amount to Withdraw</label>
+            <div class="input-wrap">
+              <input type="number" class="input-field" id="moto-withdraw-input" placeholder="0.00" min="0" oninput="updateWithdrawPreview('moto')" />
+              <button class="input-max-btn" onclick="setMax('moto-withdraw-input', 'moto-deposited')">Max</button>
+              <span class="input-token-label">MOTO</span>
+            </div>
+          </div>
+          <div class="preview-box">
+            <div class="preview-row">
+              <span>Shares to burn</span>
+              <span id="moto-wd-shares">—</span>
+            </div>
+            <div class="preview-row">
+              <span>Est. output</span>
+              <span id="moto-wd-output">—</span>
+            </div>
+          </div>
+          <button class="btn-secondary btn-full" id="moto-withdraw-btn" onclick="submitTransaction('withdraw', 'moto')">
+            <span class="btn-text">Withdraw MOTO</span>
+            <span class="btn-spinner hidden"></span>
+          </button>
+        </div>
+
+        <div class="earn-position-card">
+          <div class="earn-position-title">Your MOTO Position</div>
+          <div class="position-stats">
+            <div class="pos-stat">
+              <div class="pos-stat-label">Deposited</div>
+              <div class="pos-stat-val" id="moto-pos-deposited">—</div>
+            </div>
+            <div class="pos-stat">
+              <div class="pos-stat-label">Current Value</div>
+              <div class="pos-stat-val" id="moto-pos-value">—</div>
+            </div>
+            <div class="pos-stat">
+              <div class="pos-stat-label">Earned Interest</div>
+              <div class="pos-stat-val positive" id="moto-pos-earned">—</div>
+            </div>
+            <div class="pos-stat">
+              <div class="pos-stat-label">Historical APY</div>
+              <div class="pos-stat-val" id="moto-pos-apy">6.8%</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PILL Earn Tab -->
+    <div class="earn-tab-content hidden" id="earn-tab-pill">
+      <div class="earn-grid fade-in">
+        <div class="earn-card">
+          <div class="earn-card-title">
+            <div class="pool-icon-wrap pool-icon-pill pool-icon-sm">P</div>
+            Deposit PILL
+          </div>
+          <div class="input-group">
+            <label class="input-label">Amount</label>
+            <div class="input-wrap">
+              <input type="number" class="input-field" id="pill-deposit-input" placeholder="0.00" min="0" oninput="updateDepositPreview('pill')" />
+              <button class="input-max-btn" onclick="setMax('pill-deposit-input', 'pill-wallet')">Max</button>
+              <span class="input-token-label">PILL</span>
+            </div>
+          </div>
+          <div class="preview-box">
+            <div class="preview-row">
+              <span>Shares to receive</span>
+              <span id="pill-dep-shares">—</span>
+            </div>
+            <div class="preview-row">
+              <span>Current APR</span>
+              <span class="positive">5.1%</span>
+            </div>
+            <div class="preview-row">
+              <span>Protection Benefit</span>
+              <span class="positive">Active — liq. threshold +10%</span>
+            </div>
+          </div>
+          <button class="btn-primary btn-full" id="pill-deposit-btn" onclick="submitTransaction('deposit', 'pill')">
+            <span class="btn-text">Deposit PILL</span>
+            <span class="btn-spinner hidden"></span>
+          </button>
+        </div>
+
+        <div class="earn-card">
+          <div class="earn-card-title">
+            <div class="pool-icon-wrap pool-icon-pill pool-icon-sm">P</div>
+            Withdraw PILL
+          </div>
+          <div class="input-group">
+            <label class="input-label">Amount to Withdraw</label>
+            <div class="input-wrap">
+              <input type="number" class="input-field" id="pill-withdraw-input" placeholder="0.00" min="0" oninput="updateWithdrawPreview('pill')" />
+              <button class="input-max-btn" onclick="setMax('pill-withdraw-input', 'pill-deposited')">Max</button>
+              <span class="input-token-label">PILL</span>
+            </div>
+          </div>
+          <div class="preview-box">
+            <div class="preview-row">
+              <span>Shares to burn</span>
+              <span id="pill-wd-shares">—</span>
+            </div>
+            <div class="preview-row">
+              <span>Est. output</span>
+              <span id="pill-wd-output">—</span>
+            </div>
+          </div>
+          <button class="btn-secondary btn-full" id="pill-withdraw-btn" onclick="submitTransaction('withdraw', 'pill')">
+            <span class="btn-text">Withdraw PILL</span>
+            <span class="btn-spinner hidden"></span>
+          </button>
+        </div>
+
+        <div class="earn-position-card">
+          <div class="earn-position-title">Your PILL Position</div>
+          <div class="position-stats">
+            <div class="pos-stat">
+              <div class="pos-stat-label">Deposited</div>
+              <div class="pos-stat-val" id="pill-pos-deposited">—</div>
+            </div>
+            <div class="pos-stat">
+              <div class="pos-stat-label">Current Value</div>
+              <div class="pos-stat-val" id="pill-pos-value">—</div>
+            </div>
+            <div class="pos-stat">
+              <div class="pos-stat-label">Earned Interest</div>
+              <div class="pos-stat-val positive" id="pill-pos-earned">—</div>
+            </div>
+            <div class="pos-stat">
+              <div class="pos-stat-label">Historical APY</div>
+              <div class="pos-stat-val" id="pill-pos-apy">5.1%</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────── PAGE: BORROW ─────────── -->
+  <section class="page hidden" id="page-borrow">
+    <div class="page-header fade-in">
+      <h1 class="page-title">Borrow</h1>
+      <p class="page-subtitle">Borrow against your collateral. BTC collateral → MOTO/PILL. MOTO/PILL → BTC.</p>
+    </div>
+
+    <div class="borrow-grid fade-in">
+      <!-- Borrow Panel -->
+      <div class="borrow-panel">
+        <div class="panel-title">New Borrow</div>
+
+        <div class="input-group">
+          <label class="input-label">Borrow Asset</label>
+          <div class="pool-selector" id="borrow-pool-selector">
+            <button class="pool-sel-btn active" data-pool="moto" onclick="setBorrowPool('moto')">
+              <span class="pool-icon-sm-inline pool-color-moto">M</span> MOTO
+            </button>
+            <button class="pool-sel-btn" data-pool="pill" onclick="setBorrowPool('pill')">
+              <span class="pool-icon-sm-inline pool-color-pill">P</span> PILL
+            </button>
+            <button class="pool-sel-btn" data-pool="btc" onclick="setBorrowPool('btc')">
+              <span class="pool-icon-sm-inline pool-color-btc">₿</span> BTC
+            </button>
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label class="input-label">Borrow Amount</label>
+          <div class="input-wrap">
+            <input type="number" class="input-field" id="borrow-amount-input" placeholder="0.00" min="0" oninput="updateBorrowPreview()" />
+            <button class="input-max-btn" onclick="setBorrowMax()">Safe Max</button>
+            <span class="input-token-label" id="borrow-token-label">MOTO</span>
+          </div>
+          <div class="input-hint">Max safe borrow: <strong id="borrow-max-display">—</strong></div>
+        </div>
+
+        <div class="collateral-info-box">
+          <div class="ci-row">
+            <span class="ci-label">Collateral Rule</span>
+            <span class="ci-val" id="borrow-collateral-rule">BTC → borrow MOTO/PILL</span>
+          </div>
+          <div class="ci-row">
+            <span class="ci-label">Your Collateral</span>
+            <span class="ci-val" id="borrow-your-collateral">—</span>
+          </div>
+        </div>
+
+        <div class="preview-box">
+          <div class="preview-row">
+            <span>New Health Factor</span>
+            <span id="borrow-new-hf" class="positive">—</span>
+          </div>
+          <div class="preview-row">
+            <span>New LTV</span>
+            <span id="borrow-new-ltv">—</span>
+          </div>
+          <div class="preview-row">
+            <span>Risk Status</span>
+            <span id="borrow-risk-badge" class="badge badge-safe">—</span>
+          </div>
+        </div>
+
+        <div class="pill-protection-bar" id="pill-protection-indicator">
+          <div class="ppb-icon">P</div>
+          <div class="ppb-text">
+            <strong>PILL Protection Active</strong>
+            <span>Liquidation threshold improved by 10% (1.1x instead of 1.2x)</span>
+          </div>
+          <div class="ppb-badge positive">Active</div>
+        </div>
+
+        <div class="loyalty-tier-bar" id="loyalty-tier-bar">
+          <div class="ltb-icon">M</div>
+          <div class="ltb-text">
+            <strong>MOTO Holder Discount</strong>
+            <span>0.5% borrow rate discount applied</span>
+          </div>
+          <div class="ltb-badge">Tier 1</div>
+        </div>
+
+        <button class="btn-primary btn-full" id="borrow-submit-btn" onclick="submitTransaction('borrow', null)">
+          <span class="btn-text">Borrow</span>
+          <span class="btn-spinner hidden"></span>
+        </button>
+      </div>
+
+      <!-- Repay Panel -->
+      <div class="repay-panel">
+        <div class="panel-title">Repay Debt</div>
+
+        <div class="debt-overview-card">
+          <div class="debt-ov-row">
+            <span>MOTO Debt</span>
+            <span class="orange" id="repay-moto-debt">8,500.00 MOTO</span>
+          </div>
+          <div class="debt-ov-row">
+            <span>BTC Debt</span>
+            <span class="orange" id="repay-btc-debt">0 BTC</span>
+          </div>
+          <div class="debt-ov-row">
+            <span>Total Debt (USD)</span>
+            <span class="orange" id="repay-total-usd">$7,157.00</span>
+          </div>
+          <div class="debt-note">* Debt compounds continuously — repay early to minimize interest</div>
+        </div>
+
+        <div class="input-group">
+          <label class="input-label">Repay Asset</label>
+          <div class="pool-selector">
+            <button class="pool-sel-btn active" data-pool="moto-repay" onclick="setRepayPool('moto')">
+              <span class="pool-icon-sm-inline pool-color-moto">M</span> MOTO
+            </button>
+            <button class="pool-sel-btn" data-pool="btc-repay" onclick="setRepayPool('btc')">
+              <span class="pool-icon-sm-inline pool-color-btc">₿</span> BTC
+            </button>
+            <button class="pool-sel-btn" data-pool="pill-repay" onclick="setRepayPool('pill')">
+              <span class="pool-icon-sm-inline pool-color-pill">P</span> PILL
+            </button>
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label class="input-label">Repay Amount</label>
+          <div class="input-wrap">
+            <input type="number" class="input-field" id="repay-amount-input" placeholder="0.00" min="0" oninput="updateRepayPreview()" />
+            <button class="input-max-btn" onclick="setRepayMax()">Full</button>
+            <span class="input-token-label" id="repay-token-label">MOTO</span>
+          </div>
+        </div>
+
+        <div class="preview-box">
+          <div class="preview-row">
+            <span>Remaining Debt</span>
+            <span id="repay-remaining">—</span>
+          </div>
+          <div class="preview-row">
+            <span>New Health Factor</span>
+            <span id="repay-new-hf" class="positive">—</span>
+          </div>
+        </div>
+
+        <button class="btn-secondary btn-full" id="repay-submit-btn" onclick="submitTransaction('repay', null)">
+          <span class="btn-text">Repay</span>
+          <span class="btn-spinner hidden"></span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────── PAGE: YIELD LOOP ─────────── -->
+  <section class="page hidden" id="page-loop">
+    <div class="page-header fade-in">
+      <h1 class="page-title">Yield Loop</h1>
+      <p class="page-subtitle">Multiply BTC yield by recursively borrowing and re-depositing through the OP_NET relayer.</p>
+    </div>
+
+    <div class="loop-explainer fade-in">
+      <div class="loop-explainer-steps">
+        <div class="loop-step">
+          <div class="loop-step-icon loop-step-1">₿</div>
+          <div class="loop-step-label">Deposit BTC</div>
+        </div>
+        <div class="loop-arrow">→</div>
+        <div class="loop-step">
+          <div class="loop-step-icon loop-step-2">M</div>
+          <div class="loop-step-label">Borrow MOTO</div>
+        </div>
+        <div class="loop-arrow">→</div>
+        <div class="loop-step">
+          <div class="loop-step-icon loop-step-3">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 11-7.778 7.778 5.5 5.5 0 017.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+          </div>
+          <div class="loop-step-label">Relayer Swaps</div>
+        </div>
+        <div class="loop-arrow">→</div>
+        <div class="loop-step">
+          <div class="loop-step-icon loop-step-1">₿</div>
+          <div class="loop-step-label">Re-deposit BTC</div>
+        </div>
+        <div class="loop-arrow loop-arrow-cycle">↺</div>
+      </div>
+    </div>
+
+    <!-- Loop Active Banner -->
+    <div class="loop-active-banner hidden" id="loop-active-banner">
+      <div class="lab-header">
+        <div class="lab-title">
+          <span class="lab-dot"></span>
+          Loop Active
+        </div>
+        <div class="lab-level" id="lab-level-badge">2x Leverage</div>
+      </div>
+      <div class="lab-stats">
+        <div class="lab-stat">
+          <div class="lab-stat-label">Initial BTC</div>
+          <div class="lab-stat-val" id="lab-initial-btc">0.50 BTC</div>
+        </div>
+        <div class="lab-stat">
+          <div class="lab-stat-label">Looped BTC Added</div>
+          <div class="lab-stat-val positive" id="lab-looped-btc">+0.40 BTC</div>
+        </div>
+        <div class="lab-stat">
+          <div class="lab-stat-label">MOTO Debt</div>
+          <div class="lab-stat-val orange" id="lab-moto-debt">47,750 MOTO</div>
+        </div>
+        <div class="lab-stat">
+          <div class="lab-stat-label">Health Factor</div>
+          <div class="lab-stat-val" id="lab-hf">1.62</div>
+        </div>
+      </div>
+      <button class="btn-danger btn-full" onclick="closeLoop()">
+        <span class="btn-text">Close Loop</span>
+        <span class="btn-spinner hidden"></span>
+      </button>
+    </div>
+
+    <!-- Leverage Cards -->
+    <div class="leverage-grid fade-in" id="leverage-grid">
+      <!-- 1x -->
+      <div class="leverage-card leverage-safe" id="lev-card-1x">
+        <div class="lev-card-header">
+          <div class="lev-multiplier">1x</div>
+          <div class="lev-badge badge-safe">No Loop — Safe</div>
+        </div>
+        <div class="lev-description">Deposit BTC and earn supply APR with no additional leverage. Safest option with no liquidation risk from the loop.</div>
+        <div class="lev-flow-diagram">
+          <span class="lfd-step">0.50 BTC deposited</span>
+          <span class="lfd-arrow">→</span>
+          <span class="lfd-step">0 MOTO borrowed</span>
+          <span class="lfd-arrow">→</span>
+          <span class="lfd-step">0 BTC added</span>
+        </div>
+        <div class="lev-stats">
+          <div class="lev-stat-row">
+            <span>Total Collateral</span>
+            <span id="lev1-collateral">0.50 BTC</span>
+          </div>
+          <div class="lev-stat-row">
+            <span>MOTO to Borrow</span>
+            <span id="lev1-moto">0 MOTO</span>
+          </div>
+          <div class="lev-stat-row">
+            <span>Projected HF</span>
+            <span class="positive" id="lev1-hf">∞</span>
+          </div>
+          <div class="lev-stat-row">
+            <span>Net APR Est.</span>
+            <span class="positive">4.2%</span>
+          </div>
+        </div>
+        <button class="btn-secondary btn-full" disabled>Current Base Position</button>
+      </div>
+
+      <!-- 2x -->
+      <div class="leverage-card leverage-moderate" id="lev-card-2x">
+        <div class="lev-card-header">
+          <div class="lev-multiplier">2x</div>
+          <div class="lev-badge badge-warning">Conservative Loop</div>
+        </div>
+        <div class="lev-description">Borrow ~50% of BTC value in MOTO, swap to BTC via relayer, re-deposit. Doubles exposure while maintaining healthy HF.</div>
+        <div class="lev-flow-diagram">
+          <span class="lfd-step">0.50 BTC deposited</span>
+          <span class="lfd-arrow">→</span>
+          <span class="lfd-step lfd-orange">47,750 MOTO</span>
+          <span class="lfd-arrow">→</span>
+          <span class="lfd-step lfd-positive">+0.41 BTC</span>
+        </div>
+        <div class="lev-stats">
+          <div class="lev-stat-row">
+            <span>Total Collateral</span>
+            <span id="lev2-collateral">0.91 BTC</span>
+          </div>
+          <div class="lev-stat-row">
+            <span>MOTO to Borrow</span>
+            <span id="lev2-moto">47,750 MOTO</span>
+          </div>
+          <div class="lev-stat-row">
+            <span>Projected HF</span>
+            <span class="hf-yellow" id="lev2-hf">~1.62</span>
+          </div>
+          <div class="lev-stat-row">
+            <span>Net APR Est.</span>
+            <span class="positive">~6.1%</span>
+          </div>
+        </div>
+        <button class="btn-primary btn-full" id="lev2-btn" onclick="activateLoop(2)">
+          <span class="btn-text">Activate 2x Leverage</span>
+          <span class="btn-spinner hidden"></span>
+        </button>
+      </div>
+
+      <!-- 3x -->
+      <div class="leverage-card leverage-aggressive" id="lev-card-3x">
+        <div class="lev-card-header">
+          <div class="lev-multiplier">3x</div>
+          <div class="lev-badge badge-danger">Aggressive Loop</div>
+        </div>
+        <div class="lev-warning-banner">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+            <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
+          High liquidation risk. Market volatility may push HF below 1.2.
+        </div>
+        <div class="lev-description">Borrow ~67% of BTC value in MOTO across two loops. Maximum yield amplification with significant liquidation risk.</div>
+        <div class="lev-flow-diagram">
+          <span class="lfd-step">0.50 BTC deposited</span>
+          <span class="lfd-arrow">→</span>
+          <span class="lfd-step lfd-orange">95,500 MOTO</span>
+          <span class="lfd-arrow">→</span>
+          <span class="lfd-step lfd-positive">+0.83 BTC</span>
+        </div>
+        <div class="lev-stats">
+          <div class="lev-stat-row">
+            <span>Total Collateral</span>
+            <span id="lev3-collateral">1.33 BTC</span>
+          </div>
+          <div class="lev-stat-row">
+            <span>MOTO to Borrow</span>
+            <span id="lev3-moto">95,500 MOTO</span>
+          </div>
+          <div class="lev-stat-row">
+            <span>Projected HF</span>
+            <span class="orange" id="lev3-hf">~1.22</span>
+          </div>
+          <div class="lev-stat-row">
+            <span>Net APR Est.</span>
+            <span class="positive">~8.9%</span>
+          </div>
+        </div>
+        <button class="btn-danger btn-full" id="lev3-btn" onclick="activateLoop(3)">
+          <span class="btn-text">Activate 3x Leverage</span>
+          <span class="btn-spinner hidden"></span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────── PAGE: PORTFOLIO ─────────── -->
+  <section class="page hidden" id="page-portfolio">
+    <div class="page-header fade-in">
+      <h1 class="page-title">Portfolio</h1>
+      <p class="page-subtitle">Your complete position overview across all pools</p>
+    </div>
+
+    <!-- Portfolio Stats -->
+    <div class="stats-grid stats-grid-4 fade-in">
+      <div class="stat-card">
+        <div class="stat-label">Total Deposited</div>
+        <div class="stat-value" id="port-total-dep">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Total Borrowed</div>
+        <div class="stat-value orange" id="port-total-bor">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Net Equity</div>
+        <div class="stat-value positive" id="port-net-equity">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Claimable Interest</div>
+        <div class="stat-value positive" id="port-claimable">—</div>
+      </div>
+    </div>
+
+    <!-- PILL Protection Card -->
+    <div class="pill-protection-card fade-in" style="animation-delay:0.1s">
+      <div class="ppc-header">
+        <div class="pool-icon-wrap pool-icon-pill">P</div>
+        <div>
+          <div class="ppc-title">PILL Protection</div>
+          <div class="ppc-subtitle">Staking PILL reduces your liquidation threshold</div>
+        </div>
+        <div class="ppc-status" id="ppc-status-badge">
+          <span class="badge badge-safe">Active</span>
+        </div>
+      </div>
+
+      <div class="ppc-stats">
+        <div class="ppc-stat">
+          <div class="ppc-stat-label">Staked PILL</div>
+          <div class="ppc-stat-val" id="ppc-staked">500 PILL</div>
+        </div>
+        <div class="ppc-stat">
+          <div class="ppc-stat-label">Protection Status</div>
+          <div class="ppc-stat-val positive" id="ppc-status-text">Active</div>
+        </div>
+        <div class="ppc-stat">
+          <div class="ppc-stat-label">Liq. Threshold</div>
+          <div class="ppc-stat-val" id="ppc-liq-threshold">1.1x (protected)</div>
+        </div>
+        <div class="ppc-stat">
+          <div class="ppc-stat-label">Normal Threshold</div>
+          <div class="ppc-stat-val muted">1.2x</div>
+        </div>
+      </div>
+
+      <div class="ppc-actions">
+        <div class="input-wrap" style="max-width:200px">
+          <input type="number" class="input-field input-sm" id="pill-stake-input" placeholder="0.00" min="0" />
+          <span class="input-token-label">PILL</span>
+        </div>
+        <button class="btn-primary" onclick="submitTransaction('stake_pill', null)">
+          <span class="btn-text">Stake</span>
+          <span class="btn-spinner hidden"></span>
+        </button>
+        <div class="input-wrap" style="max-width:200px">
+          <input type="number" class="input-field input-sm" id="pill-unstake-input" placeholder="0.00" min="0" />
+          <span class="input-token-label">PILL</span>
+        </div>
+        <button class="btn-secondary" onclick="submitTransaction('unstake_pill', null)">
+          <span class="btn-text">Unstake</span>
+          <span class="btn-spinner hidden"></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Position Table -->
+    <div class="section-header fade-in" style="animation-delay:0.15s">
+      <h2 class="section-title">Your Positions</h2>
+    </div>
+
+    <div class="table-wrap fade-in" style="animation-delay:0.2s">
+      <table class="position-table">
+        <thead>
+          <tr>
+            <th>Asset</th>
+            <th>Deposited</th>
+            <th>Borrowed</th>
+            <th>Earned Interest</th>
+            <th>APR</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="position-table-body">
+          <tr>
+            <td><div class="asset-cell"><div class="pool-icon-wrap pool-icon-btc pool-icon-xs">₿</div>Bitcoin (BTC)</div></td>
+            <td id="pt-btc-dep">—</td>
+            <td id="pt-btc-bor" class="orange">—</td>
+            <td id="pt-btc-earn" class="positive">—</td>
+            <td><span class="apr-chip">4.2%</span></td>
+            <td>
+              <div class="table-actions">
+                <a href="#" class="table-action-link" onclick="navigateTo('earn'); setEarnTab('btc'); return false;">Deposit</a>
+                <a href="#" class="table-action-link" onclick="navigateTo('borrow'); setBorrowPool('btc'); return false;">Borrow</a>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td><div class="asset-cell"><div class="pool-icon-wrap pool-icon-moto pool-icon-xs">M</div>MOTO Token</div></td>
+            <td id="pt-moto-dep">—</td>
+            <td id="pt-moto-bor" class="orange">—</td>
+            <td id="pt-moto-earn" class="positive">—</td>
+            <td><span class="apr-chip">6.8%</span></td>
+            <td>
+              <div class="table-actions">
+                <a href="#" class="table-action-link" onclick="navigateTo('earn'); setEarnTab('moto'); return false;">Deposit</a>
+                <a href="#" class="table-action-link" onclick="navigateTo('borrow'); setBorrowPool('moto'); return false;">Borrow</a>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td><div class="asset-cell"><div class="pool-icon-wrap pool-icon-pill pool-icon-xs">P</div>PILL Token</div></td>
+            <td id="pt-pill-dep">—</td>
+            <td id="pt-pill-bor" class="orange">—</td>
+            <td id="pt-pill-earn" class="positive">—</td>
+            <td><span class="apr-chip">5.1%</span></td>
+            <td>
+              <div class="table-actions">
+                <a href="#" class="table-action-link" onclick="navigateTo('earn'); setEarnTab('pill'); return false;">Deposit</a>
+                <a href="#" class="table-action-link" onclick="navigateTo('borrow'); setBorrowPool('pill'); return false;">Borrow</a>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Transaction History -->
+    <div class="section-header fade-in" style="animation-delay:0.25s">
+      <h2 class="section-title">Transaction History</h2>
+    </div>
+
+    <div class="tx-history fade-in" id="tx-history" style="animation-delay:0.3s">
+      <!-- Populated by JS -->
+    </div>
+  </section>
+
+  <!-- ─────────── PAGE: INFO ─────────── -->
+  <section class="page hidden" id="page-info">
+    <div class="page-header fade-in">
+      <h1 class="page-title">Protocol Info</h1>
+      <p class="page-subtitle">Smart contract addresses, rates, and documentation</p>
+    </div>
+
+    <!-- Protocol Stats Card -->
+    <div class="info-stats-card fade-in">
+      <div class="info-card-title">Protocol Stats &amp; Addresses</div>
+      <div class="info-addr-row">
+        <span class="info-addr-label">Contract Address</span>
+        <div class="info-addr-val-wrap">
+          <span class="info-addr-val mono" id="info-contract-addr">bc1qlendbT...x9f3k2</span>
+          <button class="icon-btn" onclick="copyText('bc1qlendbtcprotocol00x9f3k2moto000000pill')" title="Copy">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+          </button>
+          <a href="#" class="icon-btn" title="View on OPNet Explorer" target="_blank">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          </a>
+        </div>
+      </div>
+      <div class="info-addr-row">
+        <span class="info-addr-label">MOTO Token</span>
+        <div class="info-addr-val-wrap">
+          <span class="info-addr-val mono" id="info-moto-addr">bc1qmoto00...abc123</span>
+          <button class="icon-btn" onclick="copyText('bc1qmoto00tokenaddressabc123lendbtc')" title="Copy">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="info-addr-row">
+        <span class="info-addr-label">PILL Token</span>
+        <div class="info-addr-val-wrap">
+          <span class="info-addr-val mono" id="info-pill-addr">bc1qpill00...xyz789</span>
+          <button class="icon-btn" onclick="copyText('bc1qpill00tokenaddressxyz789lendbtc')" title="Copy">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="info-divider"></div>
+
+      <div class="info-rates-grid">
+        <div class="info-rate-card">
+          <div class="info-rate-asset">
+            <div class="pool-icon-wrap pool-icon-btc pool-icon-sm">₿</div>
+            BTC Pool
+          </div>
+          <div class="info-rate-row"><span>Supply APR</span><span class="positive">4.2%</span></div>
+          <div class="info-rate-row"><span>Borrow APR</span><span class="orange">8.7%</span></div>
+          <div class="info-rate-row"><span>Utilization</span><span>48.2%</span></div>
+          <div class="info-rate-row"><span>TVL</span><span>$2.48M</span></div>
+        </div>
+        <div class="info-rate-card">
+          <div class="info-rate-asset">
+            <div class="pool-icon-wrap pool-icon-moto pool-icon-sm">M</div>
+            MOTO Pool
+          </div>
+          <div class="info-rate-row"><span>Supply APR</span><span class="positive">6.8%</span></div>
+          <div class="info-rate-row"><span>Borrow APR</span><span class="orange">14.2%</span></div>
+          <div class="info-rate-row"><span>Utilization</span><span>34.4%</span></div>
+          <div class="info-rate-row"><span>TVL</span><span>$1.05M</span></div>
+        </div>
+        <div class="info-rate-card">
+          <div class="info-rate-asset">
+            <div class="pool-icon-wrap pool-icon-pill pool-icon-sm">P</div>
+            PILL Pool
+          </div>
+          <div class="info-rate-row"><span>Supply APR</span><span class="positive">5.1%</span></div>
+          <div class="info-rate-row"><span>Borrow APR</span><span class="orange">11.4%</span></div>
+          <div class="info-rate-row"><span>Utilization</span><span>23.6%</span></div>
+          <div class="info-rate-row"><span>TVL</span><span>$110K</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- How It Works -->
+    <div class="section-header fade-in" style="animation-delay:0.1s">
+      <h2 class="section-title">How It Works</h2>
+    </div>
+
+    <div class="how-grid fade-in" style="animation-delay:0.15s">
+      <div class="how-card">
+        <div class="how-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="url(#howGrad1)" stroke-width="1.8">
+            <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+            <path d="M2 17l10 5 10-5"/>
+            <path d="M2 12l10 5 10-5"/>
+            <defs>
+              <linearGradient id="howGrad1" x1="2" y1="2" x2="22" y2="22">
+                <stop offset="0%" stop-color="#F7931A"/>
+                <stop offset="100%" stop-color="#E8820C"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <div class="how-title">Deposit &amp; Earn</div>
+        <div class="how-desc">Deposit BTC, MOTO, or PILL into the protocol and receive proportional shares. Your shares appreciate automatically as borrowers pay interest — no claiming required.</div>
+      </div>
+      <div class="how-card">
+        <div class="how-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="url(#howGrad2)" stroke-width="1.8">
+            <rect x="2" y="7" width="20" height="15" rx="2"/>
+            <path d="M16 12h2v4h-2z" fill="url(#howGrad2)"/>
+            <path d="M2 12h20"/>
+            <defs>
+              <linearGradient id="howGrad2" x1="2" y1="7" x2="22" y2="22">
+                <stop offset="0%" stop-color="#F7931A"/>
+                <stop offset="100%" stop-color="#E8820C"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <div class="how-title">Borrow</div>
+        <div class="how-desc">Use your deposits as collateral to borrow other assets. BTC collateral unlocks MOTO/PILL borrowing. Maintain a Health Factor above 1.2 to avoid liquidation.</div>
+      </div>
+      <div class="how-card">
+        <div class="how-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="url(#howGrad3)" stroke-width="1.8">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            <defs>
+              <linearGradient id="howGrad3" x1="4" y1="2" x2="20" y2="22">
+                <stop offset="0%" stop-color="#F7931A"/>
+                <stop offset="100%" stop-color="#E8820C"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <div class="how-title">PILL Protection</div>
+        <div class="how-desc">Stake PILL tokens to lower your liquidation threshold from 1.2x to 1.1x. This gives your position a 10% safety buffer, letting you borrow more with less liquidation risk.</div>
+      </div>
+      <div class="how-card">
+        <div class="how-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="url(#howGrad4)" stroke-width="1.8">
+            <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+            <polyline points="17 6 23 6 23 12"/>
+            <defs>
+              <linearGradient id="howGrad4" x1="1" y1="6" x2="23" y2="18">
+                <stop offset="0%" stop-color="#F7931A"/>
+                <stop offset="100%" stop-color="#E8820C"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <div class="how-title">Yield Loop</div>
+        <div class="how-desc">Amplify BTC yield by looping: deposit BTC → borrow MOTO → relayer swaps to BTC → re-deposit. Up to 3x leverage. Higher yield comes with higher liquidation risk.</div>
+      </div>
+    </div>
+
+    <!-- Risk Params -->
+    <div class="info-risk-card fade-in" style="animation-delay:0.2s">
+      <div class="info-card-title">Risk Parameters</div>
+      <div class="risk-params-grid">
+        <div class="risk-param">
+          <div class="risk-param-label">Liquidation Threshold</div>
+          <div class="risk-param-val">80% LTV</div>
+        </div>
+        <div class="risk-param">
+          <div class="risk-param-label">Health Factor Floor</div>
+          <div class="risk-param-val">1.2x</div>
+        </div>
+        <div class="risk-param">
+          <div class="risk-param-label">Liquidation Bonus</div>
+          <div class="risk-param-val">5%</div>
+        </div>
+        <div class="risk-param">
+          <div class="risk-param-label">Max Liquidation/Call</div>
+          <div class="risk-param-val">50%</div>
+        </div>
+        <div class="risk-param">
+          <div class="risk-param-label">PILL Protection Benefit</div>
+          <div class="risk-param-val positive">-10% threshold</div>
+        </div>
+        <div class="risk-param">
+          <div class="risk-param-label">Interest Model</div>
+          <div class="risk-param-val">3-Slope Compound</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- Empty State (wallet not connected) overlay for wallet-gated pages -->
+<div class="empty-state-overlay hidden" id="empty-state-overlay">
+  <div class="empty-state-card">
+    <div class="empty-icon">
+      <svg width="56" height="56" viewBox="0 0 24 24" fill="none">
+        <rect x="2" y="7" width="20" height="15" rx="2" stroke="url(#emptyGrad)" stroke-width="1.5"/>
+        <path d="M16 12h2v4h-2z" fill="url(#emptyGrad)"/>
+        <path d="M2 12h20" stroke="url(#emptyGrad)" stroke-width="1.5"/>
+        <defs>
+          <linearGradient id="emptyGrad" x1="2" y1="7" x2="22" y2="22">
+            <stop offset="0%" stop-color="#F7931A" stop-opacity="0.6"/>
+            <stop offset="100%" stop-color="#E8820C" stop-opacity="0.6"/>
+          </linearGradient>
+        </defs>
+      </svg>
+    </div>
+    <div class="empty-title">Connect Your Wallet</div>
+    <div class="empty-desc">Connect your OPWallet to view your positions and interact with the protocol.</div>
+    <button class="btn-primary" onclick="openWalletModal()">Connect Wallet</button>
+  </div>
+</div>
+
+<noscript>
+  <div style="position:fixed;inset:0;background:#0a0a0f;color:#f7931a;display:flex;align-items:center;justify-content:center;font-family:sans-serif;font-size:1.2rem;z-index:9999;">
+    LendBTC requires JavaScript to run.
+  </div>
+</noscript>
+<div id="sdk-error" style="display:none;position:fixed;bottom:1rem;right:1rem;background:#1a0a0a;border:1px solid #f7391a;color:#ff6b6b;padding:0.75rem 1rem;border-radius:8px;font-size:0.85rem;z-index:9999;max-width:320px;">
+  SDK failed to load — running in demo mode.
+</div>
+<!-- SDK bundle (built from src/ by esbuild) -->
+<script src="dist/bundle.js" onerror="document.getElementById('sdk-error').style.display='block'"></script>
+<!-- UI logic (loads after SDK so window.LendBTCSDK is available) -->
+<script src="app.js"></script>
+</body>
+</html>
